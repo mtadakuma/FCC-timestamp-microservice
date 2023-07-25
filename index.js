@@ -8,25 +8,50 @@ var app = express();
 // enable CORS (https://en.wikipedia.org/wiki/Cross-origin_resource_sharing)
 // so that your API is remotely testable by FCC 
 var cors = require('cors');
-app.use(cors({optionsSuccessStatus: 200}));  // some legacy browsers choke on 204
+app.use(cors({ optionsSuccessStatus: 200 }));  // some legacy browsers choke on 204
 
 // http://expressjs.com/en/starter/static-files.html
 app.use(express.static('public'));
 
 // http://expressjs.com/en/starter/basic-routing.html
-app.get("/", function (req, res) {
+app.get("/", function(req, res) {
   res.sendFile(__dirname + '/views/index.html');
 });
 
 
 // your first API endpoint... 
-app.get("/api/hello", function (req, res) {
-  res.json({greeting: 'hello API'});
+app.get("/api/hello", function(req, res) {
+  res.json({ greeting: 'hello API' });
 });
 
+app.get('/api', (req, res) => {
+  let date = new Date()
+  let resObj = { "unix": date.getTime(), "utc": date.toUTCString() }
+  res.json(resObj)
+})
 
+app.get('/api/:date', (req, res) => {
+  let date = new Date(req.params.date)
+  let resObj = {}
+  if (date.toUTCString() === 'Invalid Date') {
+    if (isNaN(req.params.date)) {
+      resObj = { "error": "Invalid Date" }
+    } else {
+      // console.log('Date is invalid')
+      // Convert epoch timestamp e.g.: 1451001600000
+      date = new Date(+req.params.date)
+      // console.log('date', date.toUTCString())
+      // console.log('time', date.getTime())
+      resObj = { "unix": date.getTime(), "utc": date.toUTCString() }
+    }
+  } else {
+    resObj = { "unix": date.getTime(), "utc": date.toUTCString() }
+  }
+  // console.log(date)
+  res.json(resObj)
+})
 
 // listen for requests :)
-var listener = app.listen(process.env.PORT, function () {
+var listener = app.listen(process.env.PORT, function() {
   console.log('Your app is listening on port ' + listener.address().port);
 });
